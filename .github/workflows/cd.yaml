@@ -10,7 +10,6 @@ on:
 
 env:
   binary: boids
-  crate_token: ${{ secrets.CRATES_IO_API_TOKEN }}
 
 jobs:
   create-release:
