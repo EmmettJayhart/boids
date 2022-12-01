@@ -33,6 +33,10 @@ fn setup_world(mut commands: Commands) {
 #[cfg_attr(feature = "dev", derive(Inspectable))]
 pub struct Boid {
     speed: f32,
+    lerp_factor: f32,
+    separation_factor: f32,
+    alignment_factor: f32,
+    cohesion_factor: f32,
 }
 
 fn setup_boids(
@@ -41,7 +45,7 @@ fn setup_boids(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let mesh = meshes.add(Mesh::from(shape::Icosphere {
-        radius: 0.025,
+        radius: 0.25,
         subdivisions: 3,
     }));
 
@@ -50,7 +54,7 @@ fn setup_boids(
         ..default()
     });
 
-    let num_boids = 20usize;
+    let num_boids = 144usize;
 
     commands
         .spawn(SpatialBundle::default())
@@ -62,23 +66,35 @@ fn setup_boids(
                     .spawn(PbrBundle {
                         mesh: mesh.clone(),
                         material: material.clone(),
-                        transform: Transform::from_xyz(
-                            rng.gen::<f32>() * i as f32,
-                            rng.gen::<f32>() * i as f32,
-                            rng.gen::<f32>() * i as f32,
-                        ),
+                        transform: {
+                            let mut t = Transform::default();
+                            t.translation.x = (rng.gen::<f32>() - 0.5) * 10 as f32;
+                            t.translation.y = (rng.gen::<f32>() - 0.5) * 10 as f32;
+                            t.translation.z = (rng.gen::<f32>() - 0.5) * 10 as f32;
+                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+                            t
+                        },
                         ..default()
                     })
                     .insert(Name::new(format!("Boid {}", i)))
-                    .insert(Boid { speed: 0.5 });
+                    .insert(Boid {
+                        speed: 1.0,
+                        lerp_factor: 0.125,
+                        separation_factor: 0.1,
+                        alignment_factor: 0.2,
+                        cohesion_factor: 3.0,
+                    });
             }
         });
 }
 
 fn move_boid(mut boids_query: Query<(Entity, &mut Transform, &Boid)>, time: Res<Time>) {
-    let mut net_force = Vec::with_capacity(boids_query.iter().count());
-    for (entity, transform, _) in boids_query.iter() {
+    let mut net_heading = Vec::with_capacity(boids_query.iter().count());
+    for (entity, transform, boid) in boids_query.iter() {
         let mut separation = Vec3::ZERO;
+        let mut alignment = Vec3::ZERO;
         let mut cohesion = Vec3::ZERO;
 
         for (other_entity, other_transform, _) in boids_query.iter() {
@@ -89,19 +105,24 @@ fn move_boid(mut boids_query: Query<(Entity, &mut Transform, &Boid)>, time: Res<
             let distance = transform.translation.distance(other_transform.translation);
             let distance_squared = distance.powi(2);
 
-            separation += (transform.translation - other_transform.translation).normalize()
-                / distance_squared;
-
-            cohesion += (other_transform.translation - transform.translation).normalize()
-                * distance_squared;
+            separation += (transform.translation - other_transform.translation) / distance_squared;
+            alignment += (other_transform.forward() - transform.forward()) / distance_squared;
+            cohesion += (other_transform.translation - transform.translation) / distance;
         }
 
-        cohesion /= boids_query.iter().count() as f32;
+        separation *= boid.separation_factor;
+        alignment *= boid.alignment_factor;
+        cohesion *= boid.cohesion_factor / boids_query.iter().count() as f32;
 
-        net_force.push(separation + cohesion);
+        net_heading.push((separation + alignment + cohesion).normalize());
     }
 
     for (i, (_, mut transform, boid)) in boids_query.iter_mut().enumerate() {
-        transform.translation += net_force[i] * boid.speed * time.delta_seconds();
+        transform.rotation = transform.rotation.lerp(
+            Quat::from_rotation_arc(transform.forward(), net_heading[i]),
+            boid.lerp_factor,
+        );
+        let forward = transform.forward();
+        transform.translation += forward * boid.speed * time.delta_seconds();
     }
 }
