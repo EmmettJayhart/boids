@@ -68,9 +68,9 @@ fn setup_boids(
                         material: material.clone(),
                         transform: {
                             let mut t = Transform::default();
-                            t.translation.x = (rng.gen::<f32>() - 0.5) * 10 as f32;
-                            t.translation.y = (rng.gen::<f32>() - 0.5) * 10 as f32;
-                            t.translation.z = (rng.gen::<f32>() - 0.5) * 10 as f32;
+                            t.translation.x = (rng.gen::<f32>() - 0.5) * 10.0;
+                            t.translation.y = (rng.gen::<f32>() - 0.5) * 10.0;
+                            t.translation.z = (rng.gen::<f32>() - 0.5) * 10.0;
                             t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
                             t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
                             t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
