@@ -1,0 +1,36 @@
+[package]
+name = "boids"
+version = "0.1.0"
+edition = "2021"
+authors = ["Emmett AlJneibi<ma2178@sussex.ac.uk>"]
+repository = "https://github.com/EmmettJayhart/boids"
+description = "A boids simulation to demonstrate three dimensional flocking behavior"
+publish = false
+
+# ------------------------------------------------------------------------- #
+
+[dependencies]
+bevy = { version = "0.9.0", default-features = false, features = [
+    "bevy_asset",
+    "png",
+    "x11",
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+] }
+bevy-inspector-egui = "0.14.0"
+# bevy_rapier3d = "0.19.0"
+leafwing-input-manager = "0.7.0"
+rand = "0.8.5"
+
+# Keep in sync with bevy
+image = "0.24"
+winit = "0.27"
+
+[build-dependencies]
+embed-resource = "1.7"
+
+# ------------------------------------------------------------------------- #
+
+[features]
+dev = ["bevy/dynamic"]
