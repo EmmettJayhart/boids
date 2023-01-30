@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 #[cfg(feature = "dev")]
-use bevy_inspector_egui::Inspectable;
+use bevy::reflect::Reflect;
 use rand::prelude::*;
 
 use crate::{input, player};
@@ -30,7 +30,7 @@ fn setup_world(mut commands: Commands) {
 }
 
 #[derive(Component)]
-#[cfg_attr(feature = "dev", derive(Inspectable))]
+#[cfg_attr(feature = "dev", derive(Reflect))]
 pub struct Boid {
     speed: f32,
     lerp_factor: f32,

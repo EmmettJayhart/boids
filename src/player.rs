@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
 #[cfg(feature = "dev")]
-use bevy_inspector_egui::Inspectable;
+use bevy::reflect::Reflect;
 use leafwing_input_manager::prelude::*;
 
 use crate::input;
@@ -18,9 +18,10 @@ impl Plugin for PlayerPlugin {
 }
 
 #[derive(Component)]
-#[cfg_attr(feature = "dev", derive(Inspectable))]
+#[cfg_attr(feature = "dev", derive(Reflect))]
 pub struct Player {
     speed: f32,
+    sprint: f32,
 }
 
 fn spawn_player(mut commands: Commands) {
@@ -30,7 +31,10 @@ fn spawn_player(mut commands: Commands) {
             ..default()
         })
         .insert(Name::new("Player"))
-        .insert(Player { speed: 2.5 })
+        .insert(Player {
+            speed: 2.5,
+            sprint: 5.0,
+        })
         .insert(InputManagerBundle::<input::PlayerAction> {
             input_map: input::player_input_map(),
             ..default()
@@ -38,7 +42,7 @@ fn spawn_player(mut commands: Commands) {
         .with_children(|parent| {
             parent
                 .spawn(Camera3dBundle {
-                    transform: Transform::from_xyz(0.0, 0.4, 0.0),
+                    transform: Transform::from_xyz(0.0, 0.0, 0.0),
                     ..default()
                 })
                 .insert(Name::new("Camera"))
@@ -95,6 +99,7 @@ fn player_movement(
 
         if forward || leftward || backward || rightward || upward || downward {
             let mut movement = Vec3::ZERO;
+            let sprint = action_state.pressed(input::PlayerAction::Sprint);
 
             if forward {
                 movement.z -= 1.0;
@@ -132,7 +137,9 @@ fn player_movement(
                     }
                 };
 
-                player_transform.translation += direction * player.speed * time.delta_seconds();
+                player_transform.translation += direction
+                    * if sprint { player.sprint } else { player.speed }
+                    * time.delta_seconds();
             }
         }
     }

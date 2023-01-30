@@ -17,6 +17,7 @@ pub enum PlayerAction {
     Downward,
     Backward,
     Forward,
+    Sprint,
     HorizontalPan,
 }
 
@@ -36,7 +37,9 @@ pub fn player_input_map() -> InputMap<PlayerAction> {
         (KeyCode::E, PlayerAction::Upward),
         (KeyCode::Space, PlayerAction::Upward),
         (KeyCode::Q, PlayerAction::Downward),
-        (KeyCode::LShift, PlayerAction::Downward),
+        (KeyCode::LControl, PlayerAction::Downward),
+        // Misc
+        (KeyCode::LShift, PlayerAction::Sprint),
     ])
     .insert(SingleAxis::mouse_motion_x(), PlayerAction::HorizontalPan)
     .build()
