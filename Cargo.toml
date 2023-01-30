@@ -1,6 +1,6 @@
 [package]
 name = "boids"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Emmett AlJneibi<ma2178@sussex.ac.uk>"]
 repository = "https://github.com/EmmettJayhart/boids"
