@@ -9,6 +9,7 @@ on:
 
 jobs:
   create-release:
+    name: Create Release
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,27 +17,44 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-assets:
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-          - target: x86_64-unknown-linux-gnu
-            os: windows-latest
-          - target: x86_64-apple-darwin
-            os: windows-latest
-          - target: aarch64-unknown-linux-gnu
-            os: windows-latest
-          - target: aarch64-apple-darwin
-            os: windows-latest
+  check:
+    name: Check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo check
 
-    runs-on: ${{ matrix.os }}
+  upload-windows:
+    name: Upload Windows
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: boids
-          target: ${{ matrix.target }}
+          archive: $bin-$tag-$target
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-linux:
+    name: Upload Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt install -y libudev-dev
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: boids
+          archive: $bin-$tag-$target
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-macos:
+    name: Upload MacOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: boids
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
