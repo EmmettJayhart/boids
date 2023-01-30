@@ -78,7 +78,7 @@ fn setup_boids(
                         },
                         ..default()
                     })
-                    .insert(Name::new(format!("Boid {}", i)))
+                    .insert(Name::new(format!("Boid {i}")))
                     .insert(Boid {
                         speed: 1.0,
                         lerp_factor: 0.125,
