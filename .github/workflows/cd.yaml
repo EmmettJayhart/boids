@@ -1,15 +1,12 @@
-name: Manual Delivery
+name: Continuous Delivery
 
 permissions:
   contents: write
 
 on:
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Version Tag'
-        required: true 
-        type: string
+  push:
+    branches: ["main"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
 jobs:
   create-release:
