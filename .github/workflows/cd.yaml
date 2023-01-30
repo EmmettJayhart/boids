@@ -5,6 +5,11 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Version Tag'
+        required: true 
+        type: string
 
 jobs:
   create-release:
