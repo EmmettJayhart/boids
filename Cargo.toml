@@ -1,6 +1,6 @@
 [package]
 name = "boids"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Emmett AlJneibi<ma2178@sussex.ac.uk>"]
 repository = "https://github.com/EmmettJayhart/boids"
@@ -20,7 +20,7 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "png",
     "x11",
 ] }
-bevy_boids = { path = "../bevy_boids" }
+bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
 bevy-inspector-egui = "0.17.0"
 # bevy_rapier3d = "0.20.0"
 leafwing-input-manager = "0.8.0"
