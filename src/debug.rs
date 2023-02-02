@@ -2,20 +2,20 @@ use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
 };
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
-// use bevy_rapier3d::prelude::RapierDebugRenderPlugin;
+use bevy_boids::BoidDescriptor;
+use bevy_inspector_egui::quick::ResourceInspectorPlugin;
+use bevy_rapier3d::prelude::RapierDebugRenderPlugin;
 
-use crate::{game::Boid, player::Player};
+use crate::player::Player;
 
 pub struct DebugPlugin;
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(LogDiagnosticsPlugin::default())
             .add_plugin(FrameTimeDiagnosticsPlugin)
-            .add_plugin(WorldInspectorPlugin)
-            // .add_plugin(RapierDebugRenderPlugin::default())
-            ;
+            .add_plugin(ResourceInspectorPlugin::<BoidDescriptor>::default())
+            .add_plugin(RapierDebugRenderPlugin::default());
 
-        app.register_type::<Player>().register_type::<Boid>();
+        app.register_type::<Player>();
     }
 }

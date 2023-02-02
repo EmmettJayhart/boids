@@ -1,8 +1,8 @@
 use std::f32::consts::FRAC_PI_2;
 
-use bevy::prelude::*;
 #[cfg(feature = "dev")]
 use bevy::reflect::Reflect;
+use bevy::{prelude::*, window::CursorGrabMode};
 use leafwing_input_manager::prelude::*;
 
 use crate::input;
@@ -21,7 +21,7 @@ impl Plugin for PlayerPlugin {
 #[cfg_attr(feature = "dev", derive(Reflect))]
 pub struct Player {
     speed: f32,
-    sprint: f32,
+    speed_modifier: f32,
 }
 
 fn spawn_player(mut commands: Commands) {
@@ -33,7 +33,7 @@ fn spawn_player(mut commands: Commands) {
         .insert(Name::new("Player"))
         .insert(Player {
             speed: 2.5,
-            sprint: 5.0,
+            speed_modifier: 3.2,
         })
         .insert(InputManagerBundle::<input::PlayerAction> {
             input_map: input::player_input_map(),
@@ -51,15 +51,25 @@ fn spawn_player(mut commands: Commands) {
                     ..default()
                 });
         });
+
+    commands.insert_resource(MenuToggle(false));
 }
+
+#[derive(Resource)]
+struct MenuToggle(bool);
 
 fn camera_vertical_pan(
     mut query: Query<(&mut Transform, &ActionState<input::CameraAction>), With<Camera3d>>,
+    menu_toggle: Res<MenuToggle>,
     time: Res<Time>,
 ) {
     const VERTICAL_PAN_RATE: f32 = 0.4;
 
     for (mut transform, action_state) in query.iter_mut() {
+        if menu_toggle.0 {
+            continue;
+        }
+
         let vertical_pan = -action_state.value(input::CameraAction::VerticalPan);
         let delta = vertical_pan * VERTICAL_PAN_RATE * time.delta_seconds();
 
@@ -72,11 +82,16 @@ fn camera_vertical_pan(
 
 fn player_horizontal_pan(
     mut query: Query<(&mut Transform, &ActionState<input::PlayerAction>), With<Player>>,
+    menu_toggle: Res<MenuToggle>,
     time: Res<Time>,
 ) {
     const HORIZONTAL_PAN_RATE: f32 = 0.4;
 
     for (mut transform, action_state) in query.iter_mut() {
+        if menu_toggle.0 {
+            continue;
+        }
+
         let horizontal_pan = -action_state.value(input::PlayerAction::HorizontalPan);
         let delta = horizontal_pan * HORIZONTAL_PAN_RATE * time.delta_seconds();
 
@@ -87,9 +102,28 @@ fn player_horizontal_pan(
 fn player_movement(
     mut player_query: Query<(&mut Transform, &Player, &ActionState<input::PlayerAction>)>,
     mut camera_query: Query<&mut GlobalTransform, With<Camera3d>>,
+    mut windows: ResMut<Windows>,
+    mut menu_toggle: ResMut<MenuToggle>,
     time: Res<Time>,
 ) {
     for (mut player_transform, player, action_state) in player_query.iter_mut() {
+        if action_state.just_released(input::PlayerAction::Menu) {
+            menu_toggle.0 = !menu_toggle.0;
+
+            let window = windows.get_primary_mut().unwrap();
+            if menu_toggle.0 {
+                window.set_cursor_grab_mode(CursorGrabMode::None);
+                window.set_cursor_visibility(true);
+            } else {
+                window.set_cursor_grab_mode(CursorGrabMode::Locked);
+                window.set_cursor_visibility(false);
+            }
+        }
+
+        if menu_toggle.0 {
+            continue;
+        }
+
         let forward = action_state.pressed(input::PlayerAction::Forward);
         let leftward = action_state.pressed(input::PlayerAction::Leftward);
         let backward = action_state.pressed(input::PlayerAction::Backward);
@@ -99,7 +133,6 @@ fn player_movement(
 
         if forward || leftward || backward || rightward || upward || downward {
             let mut movement = Vec3::ZERO;
-            let sprint = action_state.pressed(input::PlayerAction::Sprint);
 
             if forward {
                 movement.z -= 1.0;
@@ -137,9 +170,18 @@ fn player_movement(
                     }
                 };
 
-                player_transform.translation += direction
-                    * if sprint { player.sprint } else { player.speed }
-                    * time.delta_seconds();
+                let mut displacement = direction * player.speed * time.delta_seconds();
+                let sprint = action_state.pressed(input::PlayerAction::Sprint);
+                let crawl = action_state.pressed(input::PlayerAction::Crawl);
+                if sprint ^ crawl {
+                    if sprint {
+                        displacement *= player.speed_modifier;
+                    } else {
+                        displacement /= player.speed_modifier;
+                    }
+                }
+
+                player_transform.translation += displacement;
             }
         }
     }

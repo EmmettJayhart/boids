@@ -13,6 +13,7 @@ publish = false
 bevy = { version = "0.9.1", default-features = false, features = [
     "bevy_asset",
     "bevy_core_pipeline",
+    "bevy_gltf",
     "bevy_pbr",
     "bevy_render",
     "bevy_sprite",
@@ -20,9 +21,10 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "png",
     "x11",
 ] }
-bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
+bevy_boids = { path = "../bevy_boids" }
+# bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
 bevy-inspector-egui = "0.17.0"
-# bevy_rapier3d = "0.20.0"
+bevy_rapier3d = { version = "0.20.0", features = ["simd-stable", "parallel"] }
 leafwing-input-manager = "0.8.0"
 rand = "0.8.5"
 
@@ -36,4 +38,4 @@ embed-resource = "1.8.0"
 # ------------------------------------------------------------------------- #
 
 [features]
-dev = ["bevy/dynamic"]
+dev = ["bevy/dynamic", "bevy_boids/reflect"]

@@ -17,7 +17,7 @@ use bevy::{
     winit::WinitWindows,
 };
 use bevy_boids::*;
-// use bevy_rapier3d::prelude::*;
+use bevy_rapier3d::prelude::{NoUserData, RapierPhysicsPlugin};
 use winit::window::Icon;
 
 fn main() {
@@ -25,18 +25,22 @@ fn main() {
 
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(ClearColor(Color::rgb_u8(90, 112, 56)))
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
-                title: "Boids".to_string(),
-                present_mode: PresentMode::AutoVsync,
-                mode: WindowMode::BorderlessFullscreen,
-                resizable: false,
-                ..default()
-            },
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    window: WindowDescriptor {
+                        title: "Boids".to_string(),
+                        present_mode: PresentMode::AutoVsync,
+                        mode: WindowMode::BorderlessFullscreen,
+                        resizable: false,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
+        )
         .add_plugin(BoidsPlugin)
-        // .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(game::GamePlugin);
 
     #[cfg(feature = "dev")]

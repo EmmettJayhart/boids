@@ -1,6 +1,9 @@
-use bevy::prelude::*;
-#[cfg(feature = "dev")]
-use bevy::reflect::Reflect;
+use bevy::{
+    prelude::*,
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+};
+use bevy_boids::{Boid, BoidDescriptor};
+use bevy_rapier3d::prelude::*;
 use rand::prelude::*;
 
 use crate::{input, player};
@@ -10,8 +13,6 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_world)
             .add_startup_system(setup_boids);
-
-        app.add_system(move_boid);
 
         app.add_plugin(input::InputPlugin)
             .add_plugin(player::PlayerPlugin);
@@ -29,32 +30,21 @@ fn setup_world(mut commands: Commands) {
         .insert(Name::new("Sunlight"));
 }
 
-#[derive(Component)]
-#[cfg_attr(feature = "dev", derive(Reflect))]
-pub struct Boid {
-    speed: f32,
-    lerp_factor: f32,
-    separation_factor: f32,
-    alignment_factor: f32,
-    cohesion_factor: f32,
-}
-
 fn setup_boids(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
-    let mesh = meshes.add(Mesh::from(shape::Icosphere {
-        radius: 0.25,
-        subdivisions: 3,
-    }));
+    let num_boids = 256;
+    commands.insert_resource(BoidDescriptor::default());
 
-    let material = materials.add(StandardMaterial {
-        base_color: Color::rgb(0.3, 0.3, 0.8),
+    let mesh = asset_server.load("models/bird.glb#Mesh0/Primitive0");
+
+    let debug_material = materials.add(StandardMaterial {
+        base_color_texture: Some(images.add(uv_debug_texture())),
         ..default()
     });
-
-    let num_boids = 144usize;
 
     commands
         .spawn(SpatialBundle::default())
@@ -62,67 +52,51 @@ fn setup_boids(
         .with_children(|parent| {
             let mut rng = rand::thread_rng();
             for i in 0..num_boids {
+                let mut transform = Transform::default();
+                transform.translation.x = (rng.gen::<f32>() - 0.5) * 10.0;
+                transform.translation.y = (rng.gen::<f32>() - 0.5) * 10.0;
+                transform.translation.z = (rng.gen::<f32>() - 0.5) * 10.0;
+                transform.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+                transform.rotate_local_y((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+                transform.rotate_local_z((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
+
                 parent
                     .spawn(PbrBundle {
                         mesh: mesh.clone(),
-                        material: material.clone(),
-                        transform: {
-                            let mut t = Transform::default();
-                            t.translation.x = (rng.gen::<f32>() - 0.5) * 10.0;
-                            t.translation.y = (rng.gen::<f32>() - 0.5) * 10.0;
-                            t.translation.z = (rng.gen::<f32>() - 0.5) * 10.0;
-                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
-                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
-                            t.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
-                            t
-                        },
+                        material: debug_material.clone(),
+                        transform,
                         ..default()
                     })
                     .insert(Name::new(format!("Boid {i}")))
-                    .insert(Boid {
-                        speed: 1.0,
-                        lerp_factor: 0.125,
-                        separation_factor: 0.1,
-                        alignment_factor: 0.2,
-                        cohesion_factor: 3.0,
-                    });
+                    .insert(Boid)
+                    .insert(Collider::ball(0.5));
             }
         });
 }
 
-fn move_boid(mut boids_query: Query<(Entity, &mut Transform, &Boid)>, time: Res<Time>) {
-    let mut net_heading = Vec::with_capacity(boids_query.iter().count());
-    for (entity, transform, boid) in boids_query.iter() {
-        let mut separation = Vec3::ZERO;
-        let mut alignment = Vec3::ZERO;
-        let mut cohesion = Vec3::ZERO;
+fn uv_debug_texture() -> Image {
+    const TEXTURE_SIZE: usize = 8;
 
-        for (other_entity, other_transform, _) in boids_query.iter() {
-            if other_entity == entity {
-                continue;
-            }
+    let mut palette: [u8; 32] = [
+        255, 102, 159, 255, 255, 159, 102, 255, 236, 255, 102, 255, 121, 255, 102, 255, 102, 255,
+        198, 255, 102, 198, 255, 255, 121, 102, 255, 255, 236, 102, 255, 255,
+    ];
 
-            let distance = transform.translation.distance(other_transform.translation);
-            let distance_squared = distance.powi(2);
-
-            separation += (transform.translation - other_transform.translation) / distance_squared;
-            alignment += (other_transform.forward() - transform.forward()) / distance_squared;
-            cohesion += (other_transform.translation - transform.translation) / distance;
-        }
-
-        separation *= boid.separation_factor;
-        alignment *= boid.alignment_factor;
-        cohesion *= boid.cohesion_factor / boids_query.iter().count() as f32;
-
-        net_heading.push((separation + alignment + cohesion).normalize());
+    let mut texture_data = [0; TEXTURE_SIZE * TEXTURE_SIZE * 4];
+    for y in 0..TEXTURE_SIZE {
+        let offset = TEXTURE_SIZE * y * 4;
+        texture_data[offset..(offset + TEXTURE_SIZE * 4)].copy_from_slice(&palette);
+        palette.rotate_right(4);
     }
 
-    for (i, (_, mut transform, boid)) in boids_query.iter_mut().enumerate() {
-        transform.rotation = transform.rotation.lerp(
-            Quat::from_rotation_arc(transform.forward(), net_heading[i]),
-            boid.lerp_factor,
-        );
-        let forward = transform.forward();
-        transform.translation += forward * boid.speed * time.delta_seconds();
-    }
+    Image::new_fill(
+        Extent3d {
+            width: TEXTURE_SIZE as u32,
+            height: TEXTURE_SIZE as u32,
+            depth_or_array_layers: 1,
+        },
+        TextureDimension::D2,
+        &texture_data,
+        TextureFormat::Rgba8UnormSrgb,
+    )
 }
