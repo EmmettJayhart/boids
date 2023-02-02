@@ -21,8 +21,8 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "png",
     "x11",
 ] }
-bevy_boids = { path = "../bevy_boids" }
-# bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
+# bevy_boids = { path = "../bevy_boids" }
+bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
 bevy-inspector-egui = "0.17.0"
 bevy_rapier3d = { version = "0.20.0", features = ["simd-stable", "parallel"] }
 leafwing-input-manager = "0.8.0"
