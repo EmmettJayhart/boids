@@ -27,6 +27,7 @@ jobs:
           bin: boids
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
+          include: assets
 
   upload-linux:
     name: Upload Linux
@@ -39,6 +40,7 @@ jobs:
           bin: boids
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
+          include: assets
 
   upload-macos:
     name: Upload MacOS
@@ -50,3 +52,4 @@ jobs:
           bin: boids
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
+          include: assets
