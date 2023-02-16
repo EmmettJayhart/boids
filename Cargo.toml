@@ -21,7 +21,7 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "png",
     "x11",
 ] }
-# bevy_boids = { path = "../bevy_boids" }
+# bevy_boids = { path = "../bevy_boids", features = [
 bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids", features = [
     "reflect",
 ] }
