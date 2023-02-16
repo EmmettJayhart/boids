@@ -8,6 +8,7 @@ mod debug;
 mod game;
 mod input;
 mod player;
+mod ui;
 
 use std::io::Cursor;
 
@@ -16,7 +17,7 @@ use bevy::{
     window::{CursorGrabMode, PresentMode, WindowId, WindowMode},
     winit::WinitWindows,
 };
-use bevy_boids::*;
+use bevy_boids::BoidsPlugin;
 use bevy_rapier3d::prelude::{NoUserData, RapierPhysicsPlugin};
 use winit::window::Icon;
 

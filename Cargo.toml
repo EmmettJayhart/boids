@@ -1,6 +1,6 @@
 [package]
 name = "boids"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Emmett Jayhart<emmett@jayhart.io>"]
 repository = "https://github.com/EmmettJayhart/boids"
@@ -22,7 +22,9 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "x11",
 ] }
 # bevy_boids = { path = "../bevy_boids" }
-bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
+bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids", features = [
+    "reflect",
+] }
 bevy-inspector-egui = "0.17.0"
 bevy_rapier3d = { version = "0.20.0", features = ["simd-stable", "parallel"] }
 leafwing-input-manager = "0.8.0"
@@ -38,4 +40,4 @@ embed-resource = "1.8.0"
 # ------------------------------------------------------------------------- #
 
 [features]
-dev = ["bevy/dynamic", "bevy_boids/reflect"]
+dev = ["bevy/dynamic"]

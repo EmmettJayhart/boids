@@ -6,7 +6,7 @@ use bevy_boids::{Boid, BoidDescriptor};
 use bevy_rapier3d::prelude::*;
 use rand::prelude::*;
 
-use crate::{input, player};
+use crate::{input, player, ui};
 
 pub struct GamePlugin;
 impl Plugin for GamePlugin {
@@ -14,7 +14,8 @@ impl Plugin for GamePlugin {
         app.add_startup_system(setup_world)
             .add_startup_system(setup_boids);
 
-        app.add_plugin(input::InputPlugin)
+        app.add_plugin(ui::UiPlugin)
+            .add_plugin(input::InputPlugin)
             .add_plugin(player::PlayerPlugin);
     }
 }
