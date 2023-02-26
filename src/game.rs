@@ -57,9 +57,7 @@ fn setup_boids(
                 transform.translation.x = (rng.gen::<f32>() - 0.5) * 10.0;
                 transform.translation.y = (rng.gen::<f32>() - 0.5) * 10.0;
                 transform.translation.z = (rng.gen::<f32>() - 0.5) * 10.0;
-                transform.rotate_local_x((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
                 transform.rotate_local_y((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
-                transform.rotate_local_z((rng.gen::<f32>() - 0.5) * std::f32::consts::TAU);
 
                 parent
                     .spawn(PbrBundle {
