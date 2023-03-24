@@ -2,10 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 #[cfg(feature = "dev")]
 use bevy::reflect::Reflect;
-use bevy::{
-    prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
-};
+use bevy::{prelude::*, window::PrimaryWindow};
 use leafwing_input_manager::prelude::*;
 
 use crate::input;

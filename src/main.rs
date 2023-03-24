@@ -14,7 +14,7 @@ use std::io::Cursor as IoCursor;
 
 use bevy::{
     prelude::*,
-    window::{Cursor, PresentMode, WindowMode},
+    window::{PresentMode, WindowMode},
     winit::WinitWindows,
 };
 use bevy_boids::BoidsPlugin;
