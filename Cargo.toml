@@ -10,7 +10,7 @@ publish = false
 # ------------------------------------------------------------------------- #
 
 [dependencies]
-bevy = { version = "0.9.1", default-features = false, features = [
+bevy = { version = "0.10.0", default-features = false, features = [
     "bevy_asset",
     "bevy_core_pipeline",
     "bevy_gltf",
@@ -21,18 +21,16 @@ bevy = { version = "0.9.1", default-features = false, features = [
     "png",
     "x11",
 ] }
-# bevy_boids = { path = "../bevy_boids", features = [
-bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids", features = [
-    "reflect",
-] }
-bevy-inspector-egui = "0.17.0"
-bevy_rapier3d = { version = "0.20.0", features = ["simd-stable", "parallel"] }
-leafwing-input-manager = "0.8.0"
+# bevy_boids = { path = "../bevy_boids" }
+bevy_boids = { git = "https://github.com/EmmettJayhart/bevy_boids" }
+bevy-inspector-egui = "0.18.1"
+bevy_rapier3d = { version = "0.21.0", features = ["simd-stable", "parallel"] }
+leafwing-input-manager = "0.9.1"
 rand = "0.8.5"
 
 # Keep in sync with bevy
 image = "0.24"
-winit = "0.27"
+winit = "0.28"
 
 [build-dependencies]
 embed-resource = "1.8.0"
@@ -40,4 +38,4 @@ embed-resource = "1.8.0"
 # ------------------------------------------------------------------------- #
 
 [features]
-dev = ["bevy/dynamic"]
+dev = ["bevy/dynamic_linking"]
