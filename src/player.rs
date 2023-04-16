@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 #[cfg(feature = "dev")]
 use bevy::reflect::Reflect;
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{prelude::*, window::CursorGrabMode};
 use leafwing_input_manager::prelude::*;
 
 use crate::input;
@@ -102,7 +102,7 @@ fn player_horizontal_pan(
 fn player_movement(
     mut player_query: Query<(&mut Transform, &Player, &ActionState<input::PlayerAction>)>,
     mut camera_query: Query<&mut GlobalTransform, With<Camera3d>>,
-    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
+    mut windows: ResMut<Windows>,
     mut menu_toggle: ResMut<MenuToggle>,
     time: Res<Time>,
 ) {
@@ -110,11 +110,13 @@ fn player_movement(
         if action_state.just_released(input::PlayerAction::Menu) {
             menu_toggle.0 = !menu_toggle.0;
 
-            let mut window = window_query.single_mut();
+            let window = windows.get_primary_mut().unwrap();
             if menu_toggle.0 {
-                window.cursor.visible = true;
+                window.set_cursor_grab_mode(CursorGrabMode::None);
+                window.set_cursor_visibility(true);
             } else {
-                window.cursor.visible = false;
+                window.set_cursor_grab_mode(CursorGrabMode::Locked);
+                window.set_cursor_visibility(false);
             }
         }
 
